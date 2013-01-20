@@ -19,7 +19,7 @@ This repo curently contains four versions of the derivatives code:
 
 4. Nada Amin's Clojure version of the regular expression matcher, written in core.logic.
 
-The relational matcher can determine whether a "string" (really a sequence of symbols) matches a regular expression.  In addition, the matcher can *generate* strings that match a given regex.  Also, the matcher can generate strings that *don't* match a given regex (which I think is pretty cool, actually).  Furthermore, the matcher can generate regex that accept a given string, and can generate regex that *don't* match a given string.  Of course, the relation also works when all of its arguments are fresh logic variables.
+The relational matcher can determine whether a "string" (really a sequence of symbols) matches a regular expression.  In addition, the matcher can *generate* strings that match a given regex.  Also, the matcher can generate strings that *don't* match a given regex (which is pretty cool, actually).  Furthermore, the matcher can generate regex that accept a given string, and can generate regex that *don't* match a given string.  Of course, the relation also works when all of its arguments are fresh logic variables.
 
 Obvious TODO's:
 
