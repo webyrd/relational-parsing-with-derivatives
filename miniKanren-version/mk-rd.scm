@@ -22,6 +22,9 @@
 ;; Special regular expressions.
 ;;; Would these be better represented as symbols?
 ;;; Would probably make answers easier to read.
+;;; However, using booleans has the advantage that the
+;;; types are disjoint with that of symbols, which basically
+;;; represent the characters in a string.
 (define regex-NULL #f)    ; -- the empty set
 (define regex-BLANK #t)   ; -- the empty string
 
