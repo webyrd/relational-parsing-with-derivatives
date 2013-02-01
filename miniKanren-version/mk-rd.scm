@@ -441,8 +441,8 @@
 ;;; Very interesting...
 (check-expect (run 2 (q)
                 (fresh (regex data)
-                  (=/= '() data)
-                  (regex-matcho regex 
+                  (=/= '() data) ; perhaps unifying data with a pair would be better style
+                  (regex-matcho regex
                                 data
                                 regex-BLANK)
                   (== `(,regex ,data) q)))
@@ -453,7 +453,11 @@
 ;;; these answers come back immediately, as opposed to the
 ;;; non-empty data that *does* match.  Why???
 ;;;
-;;; Also, I'm nervous about having #f as the regex.  Is this really
+;;; Actually, this behavior shouldn't be surprising:
+;;; there are many, many more regexs that *don't* match than match.
+;;; Same when generating strings.
+;;;
+;;; I'm nervous about having #f as the regex.  Is this really
 ;;; legit, from a type standpoint?
 ;;;
 ;;;
