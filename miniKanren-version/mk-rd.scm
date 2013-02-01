@@ -502,9 +502,9 @@
                 (((seq (rep _.0) (alt _.1 _.2)) ()) (=/= ((_.0 . #f)) ((_.0 . #t)) ((_.1 . _.2))) (sym _.1 _.2))))
 
 ;;; generate regexs, and *non-empty* data, that match
-;;; This seems slow to generate answers.  Even a run2 takes a while.
+;;; This seems slow to generate answers.  Even a run 3 takes a while.
 (check-expect "27"
-              (run 2 (q)
+              (run 3 (q)
                 (fresh (regex data)
                   (=/= '() data) ; perhaps unifying data with a pair would be better style
                   (regex-matcho regex
@@ -512,7 +512,8 @@
                                 regex-BLANK)
                   (== `(,regex ,data) q)))
               '(((_.0 (_.0)) (sym _.0))
-                (((rep _.0) (_.0)) (sym _.0))))
+                (((rep _.0) (_.0)) (sym _.0))
+                (((alt #t _.0) (_.0)) (sym _.0))))
 
 ;;; generate regexs, and *non-null* data, that *don't* match
 ;;; these answers come back immediately, as opposed to the
