@@ -414,7 +414,6 @@
 
 ;;; look for the literal match regex (longer)
 ;;; hard version (generate and test)
-;;; this test doesn't seem to come back (at least not quickly)
 (check-expect "24"
               (run 1 (q)
                 (regex-matcho q 
