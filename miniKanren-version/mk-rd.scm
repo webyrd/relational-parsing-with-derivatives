@@ -410,14 +410,13 @@
 ;;; look for the literal match regex (longer)
 ;;; hard version (generate and test)
 ;;; this test doesn't seem to come back (at least not quickly)
-#;(check-expect "24"
-               (run 1 (q)
+(check-expect "24"
+              (run 1 (q)
                 (regex-matcho q 
                               '(foo bar bar bar)
                               regex-BLANK)
                 (== `(seq foo (seq bar (seq bar bar))) q))
               '((seq foo (seq bar (seq bar bar)))))
-
 
 ;;; generate regex, and data that matches.
 ;;; Interestingly, the data is almost always null.
