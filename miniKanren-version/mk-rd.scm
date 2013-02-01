@@ -71,10 +71,8 @@
        (== `(rep ,re1) re)
 ;;; Ensure re should really be represented as a rep expression, and
 ;;; cannot be simplified to regex-BLANK.
-;       (repo re1 re)
        (=/= regex-BLANK re1)
        (=/= regex-NULL re1)
-       
        (== regex-BLANK out))]
     [(fresh (re1 re2 res1 res2)
        (== `(seq ,re1 ,re2) re)
@@ -100,13 +98,10 @@
          [(=/= c re) (== regex-NULL out)])]
       [(fresh (re1 res1 res2)
          (== `(rep ,re1) re)
-
 ;;; Ensure re should really be represented as a rep expression, and
 ;;; cannot be simplified to regex-BLANK.
-;        (repo re1 re)
          (=/= regex-BLANK re1)
-         (=/= regex-NULL re1)
-                  
+         (=/= regex-NULL re1)                  
          (d/dco re1 c res1)
          (repo re1 res2)
          (seqo res1 res2 out))]
