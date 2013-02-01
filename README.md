@@ -27,7 +27,7 @@ Obvious TODO's:
 
 1. Fix a problem in the miniKanren code with how terms are destructured.  For example, (rep regex-BLANK) shouldn't be a legal term, since it should be simplified to regex-BLANK.  The current code can generate this term when running backwards. [UPDATE: this has been fixed in the miniKanren version, but not yet ported to the other implementations.]
 
-2. Try to find a canonical representation for regex; for example, (alt re1 re2) and (alt re2 re1) should be represented by a single canonical term.  Seems like this is only an issue for alt terms.  Might need a term ordering goal (or better yet, constraint).
+2. Try to find a canonical representation for regex; for example, (alt re1 re2) and (alt re2 re1) should be represented by a single canonical term.  Seems like this is only an issue for alt terms.  Might need a term ordering goal (or better yet, constraint): (term<=o t1 t2).
 
 3. Explore different goal orderings (and possibly add bounds relations to prune the search tree when appropriate) to speed up code when running backwards, and to ensure run*'s terminate when there are finitely many answers.
 
