@@ -569,6 +569,41 @@
 
 (check-expect "29b"
               (run 10 (q)
+                (fresh (regex data out)
+                  (== '(rep #t) regex)
+                  (regex-matcho regex data out)))
+              '())
+
+(check-expect "29c"
+              (run 10 (q)
+                (fresh (regex data out)
+                  (== '(rep #f) regex)
+                  (regex-matcho regex data out)))
+              '())
+
+(check-expect "29d"
+              (run 10 (q)
+                (fresh (regex data out)
+                  (== '(alt #f #f) regex)
+                  (regex-matcho regex data out)))
+              '())
+
+(check-expect "29e"
+              (run 10 (q)
+                (fresh (regex data out)
+                  (== '(seq #f #f) regex)
+                  (regex-matcho regex data out)))
+              '())
+
+(check-expect "29f"
+              (run 10 (q)
+                (fresh (regex data out)
+                  (== '(seq #t #t) regex)
+                  (regex-matcho regex data out)))
+              '())
+
+(check-expect "29z"
+              (run 10 (q)
                 (fresh (regex data)
                   (== #t regex)
                   (=/= '() data)
