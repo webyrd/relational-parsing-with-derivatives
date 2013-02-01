@@ -36,6 +36,8 @@
 ;;; expressions: regex-BLANK should be used instead.
 ;;;
 ;;; Similarly, seq and alt expressions can also be simplified.
+;;;
+;;; Should (rep (rep exp)) be simplified to (rep exp)?
 
 ;; Simplifying regex constructors.
 
@@ -127,12 +129,11 @@
        (conde
          [(== c re) (== regex-BLANK out)]
          [(=/= c re) (== regex-NULL out)])]
-      [(fresh (re1 res1 res2)
+      [(fresh (re1 res1)
          (== `(rep ,re1) re)
-         (valid-repo re)                  
-         (d/dco re1 c res1)
-         (repo re1 res2)
-         (seqo res1 res2 out))]
+         (valid-repo re)
+         (seqo res1 re out)
+         (d/dco re1 c res1))]
       [(fresh (re1 re2 res1 res2)
          (== `(alt ,re1 ,re2) re)
          (valid-alto re)
@@ -243,7 +244,7 @@
                 (((alt _.0 _.1) #f) (=/= ((_.0 . _.1))) (sym _.0 _.1))))
 
 (check-expect "13"
-              (run 5 (q)
+              (run 10 (q)
                 (fresh (re c out)
                   (regex-derivativeo re c out)
                   (== `(,re ,c ,out) q)))
@@ -251,7 +252,12 @@
                 ((#f _.0 #f) (sym _.0))
                 ((_.0 _.0 #t) (sym _.0))
                 ((_.0 _.1 #f) (=/= ((_.1 . _.0))) (sym _.0 _.1))
-                (((rep _.0) _.0 (rep _.0)) (sym _.0))))
+                (((rep _.0) _.1 #f) (=/= ((_.1 . _.0))) (sym _.0 _.1))
+                (((rep _.0) _.0 (rep _.0)) (sym _.0))
+                (((alt #t _.0) _.0 #t) (sym _.0))
+                (((rep (rep _.0)) _.1 #f) (=/= ((_.1 . _.0))) (sym _.0 _.1))
+                (((alt #t _.0) _.1 #f) (=/= ((_.1 . _.0))) (sym _.0 _.1))
+                (((alt _.0 #t) _.0 #t) (sym _.0))))
 
 (check-expect "14"
               (run* (q) (regex-matcho '(seq foo (rep bar)) 
@@ -291,20 +297,20 @@
                                       q
                                       regex-NULL))
               '(()
-                (bar)
                 ((_.0) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
                 ((foo _.0) (=/= ((_.0 . bar))) (sym _.0))
-                ((bar _.0) (sym _.0))
                 ((_.0 _.1) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1))
+                (bar)
                 ((foo _.0 _.1) (=/= ((_.0 . bar))) (sym _.0 _.1))
-                ((bar _.0 _.1) (sym _.0 _.1))
                 ((_.0 _.1 _.2) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2))
+                ((bar _.0) (sym _.0))
                 ((foo _.0 _.1 _.2) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2))
                 ((foo bar _.0) (=/= ((_.0 . bar))) (sym _.0))
-                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))
                 ((_.0 _.1 _.2 _.3) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3))
+                ((bar _.0 _.1) (sym _.0 _.1))
                 ((foo _.0 _.1 _.2 _.3) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2 _.3))
-                ((bar _.0 _.1 _.2 _.3) (sym _.0 _.1 _.2 _.3))))
+                ((_.0 _.1 _.2 _.3 _.4) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3 _.4))
+                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))))
 
 ;;; again, generate strings that *don't* match the pattern (!)
 ;;; this time, the output can be anything other than epsilon (as opposed to the empty set)
@@ -318,20 +324,20 @@
                                 q
                                 out)))
               '(()
-                (bar)
                 ((_.0) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
                 ((foo _.0) (=/= ((_.0 . bar))) (sym _.0))
-                ((bar _.0) (sym _.0))
                 ((_.0 _.1) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1))
+                (bar)
                 ((foo _.0 _.1) (=/= ((_.0 . bar))) (sym _.0 _.1))
-                ((bar _.0 _.1) (sym _.0 _.1))
                 ((_.0 _.1 _.2) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2))
+                ((bar _.0) (sym _.0))
                 ((foo _.0 _.1 _.2) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2))
                 ((foo bar _.0) (=/= ((_.0 . bar))) (sym _.0))
-                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))
                 ((_.0 _.1 _.2 _.3) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3))
+                ((bar _.0 _.1) (sym _.0 _.1))
                 ((foo _.0 _.1 _.2 _.3) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2 _.3))
-                ((bar _.0 _.1 _.2 _.3) (sym _.0 _.1 _.2 _.3))))
+                ((_.0 _.1 _.2 _.3 _.4) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3 _.4))
+                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))))
 
 ;;; generate regex patterns that match the input string (!)
 ;;; (seq foo (rep bar)) was the original regex
@@ -346,36 +352,36 @@
               (run 30 (q) (regex-matcho q 
                                       '(foo bar bar bar)
                                       regex-BLANK))
-              '((rep (alt foo bar))
-                (seq foo (rep bar)) ; jackpot!
-                (rep (alt bar foo)) ; equivalent to a previous regex
-                (rep (rep (alt foo bar)))
-                (rep (seq foo (rep bar)))
+              '((seq foo (rep bar)) ; jackpot!
+                (rep (alt foo bar))
                 (seq foo (rep (rep bar)))
-                (rep (rep (alt bar foo)))
+                (rep (alt bar foo)) ; equivalent to a previous regex
+                (seq foo (rep (rep (rep bar))))
                 (rep (alt foo (rep bar)))
+                (rep (rep (alt foo bar)))
+                (seq foo (alt #t (rep bar)))
+                (rep (seq foo (rep bar)))
+                (alt #t (seq foo (rep bar)))
                 (seq foo (rep (alt #t bar)))
                 (seq (rep foo) (rep bar))
-                (rep (rep (rep (alt foo bar))))
-                (rep (seq (rep foo) bar))
-                (rep (rep (seq foo (rep bar))))
-                (rep (alt bar (rep foo)))
-                (rep (seq foo (rep (rep bar))))
-                (seq foo (rep (rep (rep bar))))
-                (rep (alt (rep foo) bar))
+                (seq foo (rep (rep (rep (rep bar)))))
+                (rep (rep (alt bar foo)))
+                (rep (alt (rep bar) foo))
+                (seq foo (alt foo (rep bar)))
                 (rep (alt #t (alt foo bar)))
                 (alt #t (rep (alt foo bar)))
-                (rep (alt foo (alt #t bar)))
-                (rep (rep (rep (alt bar foo))))
-                (seq foo (alt #t (rep bar)))
-                (seq foo (rep (alt foo bar)))
-                (alt #t (seq foo (rep bar)))
-                (rep (rep (alt foo (rep bar))))
+                (seq foo (seq bar (rep bar)))
                 (seq foo (rep (alt bar #t)))
+                (alt foo (seq foo (rep bar)))
                 (rep (alt foo (rep (rep bar))))
-                (rep (seq foo (rep (alt #t bar))))
-                (rep (alt (rep bar) foo))
-                (seq (rep foo) (rep (rep bar)))))
+                (rep (alt foo (alt #t bar)))
+                (seq foo (rep (alt foo bar)))
+                (seq foo (rep (rep (alt #t bar))))
+                (rep (seq foo (rep (rep bar))))
+                (seq foo (alt #t (rep (rep bar))))
+                (alt #t (seq foo (rep (rep bar))))
+                (seq (rep foo) (rep (rep bar)))
+                (seq foo (rep (rep (rep (rep (rep bar))))))))
 
 ;;; look for the literal match regex
 ;;; easy version
