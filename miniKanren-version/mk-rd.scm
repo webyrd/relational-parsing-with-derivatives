@@ -141,7 +141,6 @@
          (d/dco re2 c res2)
          (alto res1 res2 out))]
       [(fresh (re1 re2 res1 res2 res3 res4 res5)
-; WEB: this is going to be trouble
          (== `(seq ,re1 ,re2) re)
          (valid-seqo re)
          (d/dco re1 c res1)
