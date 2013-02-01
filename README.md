@@ -29,13 +29,15 @@ Obvious TODO's:
 
 2. Try to find a canonical representation for regex; for example, (alt re1 re2) and (alt re2 re1) should be represented by a single canonical term.  Seems like this is only an issue for alt terms.  Might need a term ordering goal (or better yet, constraint): (term<o t1 t2).
 
-3. Explore different goal orderings (and possibly add bounds relations to prune the search tree when appropriate) to speed up code when running backwards, and to ensure run*'s terminate when there are finitely many answers.
+3. See if regex-matcho can be simplified.
 
-4. Implement full parsing rather than just matching (right now the title for the repo is misleading!).
+4. Explore different goal orderings (and possibly add bounds relations to prune the search tree when appropriate) to speed up code when running backwards, and to ensure run*'s terminate when there are finitely many answers.
 
-5. See if tabling will allow the code to handle CFGs, not just regular languages.  This may require implementing coinductive logic programming.  This may be accomplished more easily in core.logic, since miniKanren's tabling implementation doesn't yet support constraints.
+5. Implement full parsing rather than just matching (right now the title for the repo is misleading!).
 
-6. Clean up/Racketize the Super Chobo Racket implementation.
+6. See if tabling will allow the code to handle CFGs, not just regular languages.  This may require implementing coinductive logic programming.  This may be accomplished more easily in core.logic, since miniKanren's tabling implementation doesn't yet support constraints.
+
+7. Clean up/Racketize the Super Chobo Racket implementation.
 
 See the comments in the Scheme and miniKanren code for other TODO's and open questions.
 
