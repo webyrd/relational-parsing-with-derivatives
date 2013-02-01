@@ -20,8 +20,11 @@
 
 
 ;; Special regular expressions.
+;;; Would these be better represented as symbols?
+;;; Would probably make answers easier to read.
 (define regex-NULL #f)    ; -- the empty set
 (define regex-BLANK #t)   ; -- the empty string
+
 
 
 ;; Simplifying regex constructors.
@@ -502,7 +505,7 @@
 ;;;
 ;;; I think I know the problem.  We use the 'repo' constructor/simplifier to
 ;;; *construct* terms, but not to destruct terms.  Of course, with unification this
-;;; distinction between constructing and desctructing is very slippery.  Is there
+;;; distinction between constructing and destructing is very slippery.  Is there
 ;;; any way to destruct using 'repo' (and similarly for 'seqo' and 'alto')?
 ;;; If that won't work, probably is necessary to add constraints when destructuring,
 ;;; to ensure illegal terms can't be instantiated when running backwards.
