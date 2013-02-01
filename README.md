@@ -19,7 +19,7 @@ This repo curently contains five versions of the derivatives code:
 
 4. Nada Amin's Clojure version of the regular expression matcher, written in core.logic.
 
-5. Will Byrd's Super Chobo port of the regular expression matcher, written in miniKanren, to Racket.  This version works, but neets some serious Racketization, especially as all the code is shoved into one giant file.  Please halp!
+5. Will Byrd's Super Chobo port of the relational regular expression matcher to Racket.  This version works, but neets some serious Racketization, especially as all the code is shoved into one giant file.  Please halp!
 
 The relational matcher can determine whether a "string" (really a sequence of symbols) matches a regular expression.  In addition, the matcher can *generate* strings that match a given regex.  Also, the matcher can generate strings that *don't* match a given regex (which is pretty cool, actually).  Furthermore, the matcher can generate regex that accept a given string, and can generate regex that *don't* match a given string.  Of course, the relation also works when all of its arguments are fresh logic variables.
 
