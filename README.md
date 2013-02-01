@@ -31,7 +31,7 @@ Obvious TODO's:
 
 2. Try to find a canonical representation for regex; for example, (alt re1 re2) and (alt re2 re1) should be represented by a single canonical term.  Seems like this is only an issue for alt terms.  Might need a term ordering goal (or better yet, constraint): (term<o t1 t2).
 
-3. See if regex-matcho can be simplified.
+3. See if regex-matcho can be simplified. [UPDATE: this has been fixed in the miniKanren version, with deltao now returning #f or #t instead of sometimes returning an alt or seq list. This improvement has not yet ported to the other implementations.]
 
 4. Explore different goal orderings (and possibly add bounds relations to prune the search tree when appropriate) to speed up code when running backwards, and to ensure run*'s terminate when there are finitely many answers.
 
