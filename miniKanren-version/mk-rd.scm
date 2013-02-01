@@ -93,8 +93,8 @@
     [(symbolo re) (== regex-NULL out)]
     [(fresh (re1)
        (== `(rep ,re1) re)
-       (valid-repo re)
-       (== regex-BLANK out))]
+       (== regex-BLANK out)
+       (valid-repo re))]
     [(fresh (re1 re2 res1 res2)
        (== `(seq ,re1 ,re2) re)
        (valid-seqo re)
@@ -275,8 +275,8 @@
 ;;; seems to get slow surprisingly fast.  probably a goal ordering issue
 (check-expect "17"
               (run 6 (q) (regex-matcho '(seq foo (rep bar)) 
-                                      q
-                                      regex-BLANK))
+                                       q
+                                       regex-BLANK))
               '((foo)
                 (foo bar)
                 (foo bar bar)
@@ -299,8 +299,8 @@
                 ((bar _.0 _.1) (sym _.0 _.1))
                 ((_.0 _.1 _.2) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2))
                 ((foo _.0 _.1 _.2) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2))
-                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))
                 ((foo bar _.0) (=/= ((_.0 . bar))) (sym _.0))
+                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))
                 ((_.0 _.1 _.2 _.3) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3))
                 ((foo _.0 _.1 _.2 _.3) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2 _.3))
                 ((bar _.0 _.1 _.2 _.3) (sym _.0 _.1 _.2 _.3))))
@@ -326,8 +326,8 @@
                 ((bar _.0 _.1) (sym _.0 _.1))
                 ((_.0 _.1 _.2) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2))
                 ((foo _.0 _.1 _.2) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2))
-                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))
                 ((foo bar _.0) (=/= ((_.0 . bar))) (sym _.0))
+                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))
                 ((_.0 _.1 _.2 _.3) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3))
                 ((foo _.0 _.1 _.2 _.3) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2 _.3))
                 ((bar _.0 _.1 _.2 _.3) (sym _.0 _.1 _.2 _.3))))
