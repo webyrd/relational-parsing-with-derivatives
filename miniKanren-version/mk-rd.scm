@@ -37,7 +37,8 @@
 ;;;
 ;;; Similarly, seq and alt expressions can also be simplified.
 ;;;
-;;; Should (rep (rep exp)) be simplified to (rep exp)?
+;;; Also, (rep (rep exp)) is simplified to (rep exp)
+;;; This is a change from the original Scheme code.
 
 ;; Simplifying regex constructors.
 
@@ -77,7 +78,12 @@
   (fresh (pat)
     (== `(rep ,pat) exp)
     (=/= regex-BLANK pat)
-    (=/= regex-NULL pat)))
+    (=/= regex-NULL pat)
+    (fresh (re1 re2)
+      (conde
+        ((symbolo pat))
+        ((== `(seq ,re1 ,re2) pat))
+        ((== `(alt ,re1 ,re2) pat))))))
 
 (define (repo pat out)
   (conde
@@ -85,7 +91,17 @@
      (conde
        [(== regex-NULL pat)]
        [(== regex-BLANK pat)])]
-    [(=/= regex-NULL pat) (=/= regex-BLANK pat) (== `(rep ,pat) out)]))
+    [(conde
+       ((symbolo pat) (== `(rep ,pat) out))
+       ((fresh (re1 re2)
+          (conde
+            ((== `(rep ,re1) pat)
+             ; remove nested reps
+             (== pat out))
+            ((== `(seq ,re1 ,re2) pat)
+             (== `(rep ,pat) out))
+            ((== `(alt ,re1 ,re2) pat)
+             (== `(rep ,pat) out))))))]))
 
 ;; Matching functions.
 
@@ -234,12 +250,12 @@
               '((#t #t)
                 (#f #f)
                 ((_.0 #f) (sym _.0))
-                (((rep _.0) #t) (=/= ((_.0 . #f)) ((_.0 . #t))))
+                (((rep _.0) #t) (sym _.0))
+                ((rep (seq _.0 _.1)) #t)
+                ((rep (alt _.0 _.1)) #t)
                 (((seq _.0 _.1) #f) (sym _.0 _.1))
                 (((alt #t _.0) #t) (sym _.0))
                 (((alt _.0 #t) #t) (sym _.0))
-                (((seq _.0 (rep _.1)) #f) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
-                (((alt #t (rep _.0)) #t) (=/= ((_.0 . #f)) ((_.0 . #t))))
                 (((alt _.0 _.1) #f) (=/= ((_.0 . _.1))) (sym _.0 _.1))))
 
 (check-expect "13"
@@ -254,9 +270,9 @@
                 (((rep _.0) _.1 #f) (=/= ((_.1 . _.0))) (sym _.0 _.1))
                 (((rep _.0) _.0 (rep _.0)) (sym _.0))
                 (((alt #t _.0) _.0 #t) (sym _.0))
-                (((rep (rep _.0)) _.1 #f) (=/= ((_.1 . _.0))) (sym _.0 _.1))
                 (((alt #t _.0) _.1 #f) (=/= ((_.1 . _.0))) (sym _.0 _.1))
-                (((alt _.0 #t) _.0 #t) (sym _.0))))
+                (((alt _.0 #t) _.0 #t) (sym _.0))
+                (((seq _.0 _.0) _.0 _.0) (sym _.0))))
 
 (check-expect "14"
               (run* (q) (regex-matcho '(seq foo (rep bar)) 
@@ -304,17 +320,16 @@
                 ((_.0 _.1 _.2) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2))
                 ((bar _.0) (sym _.0))
                 ((foo _.0 _.1 _.2) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2))
-                ((foo bar _.0) (=/= ((_.0 . bar))) (sym _.0))
                 ((_.0 _.1 _.2 _.3) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3))
                 ((bar _.0 _.1) (sym _.0 _.1))
                 ((foo _.0 _.1 _.2 _.3) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2 _.3))
+                ((foo bar _.0) (=/= ((_.0 . bar))) (sym _.0))
                 ((_.0 _.1 _.2 _.3 _.4) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3 _.4))
                 ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))))
 
 ;;; again, generate strings that *don't* match the pattern (!)
 ;;; this time, the output can be anything other than epsilon (as opposed to the empty set)
-;;; Seems to generate the same answers as with the empty-set, which is good
-;;; This distinction should disappear if regex-matcho can be simplified.
+;;; This should produce the same answers as when the output is regex-NULL.
 (check-expect "19"
               (run 15 (q)
                 (fresh (out)
@@ -322,21 +337,9 @@
                   (regex-matcho '(seq foo (rep bar)) 
                                 q
                                 out)))
-              '(()
-                ((_.0) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
-                ((foo _.0) (=/= ((_.0 . bar))) (sym _.0))
-                ((_.0 _.1) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1))
-                (bar)
-                ((foo _.0 _.1) (=/= ((_.0 . bar))) (sym _.0 _.1))
-                ((_.0 _.1 _.2) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2))
-                ((bar _.0) (sym _.0))
-                ((foo _.0 _.1 _.2) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2))
-                ((foo bar _.0) (=/= ((_.0 . bar))) (sym _.0))
-                ((_.0 _.1 _.2 _.3) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3))
-                ((bar _.0 _.1) (sym _.0 _.1))
-                ((foo _.0 _.1 _.2 _.3) (=/= ((_.0 . bar))) (sym _.0 _.1 _.2 _.3))
-                ((_.0 _.1 _.2 _.3 _.4) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0 _.1 _.2 _.3 _.4))
-                ((bar _.0 _.1 _.2) (sym _.0 _.1 _.2))))
+              (run 15 (q) (regex-matcho '(seq foo (rep bar)) 
+                                        q
+                                        regex-NULL)))
 
 ;;; generate regex patterns that match the input string (!)
 ;;; (seq foo (rep bar)) was the original regex
@@ -353,34 +356,34 @@
                                       regex-BLANK))
               '((seq foo (rep bar)) ; jackpot!
                 (rep (alt foo bar))
-                (seq foo (rep (rep bar)))
                 (rep (alt bar foo)) ; equivalent to a previous regex
-                (seq foo (rep (rep (rep bar))))
-                (rep (alt foo (rep bar)))
-                (rep (rep (alt foo bar)))
-                (seq foo (alt #t (rep bar)))
-                (rep (seq foo (rep bar)))
-                (alt #t (seq foo (rep bar)))
                 (seq foo (rep (alt #t bar)))
-                (seq (rep foo) (rep bar))
-                (seq foo (rep (rep (rep (rep bar)))))
-                (rep (rep (alt bar foo)))
-                (rep (alt (rep bar) foo))
-                (seq foo (alt foo (rep bar)))
-                (rep (alt #t (alt foo bar)))
-                (alt #t (rep (alt foo bar)))
-                (seq foo (seq bar (rep bar)))
+                (seq foo (alt #t (rep bar)))
+                (alt #t (seq foo (rep bar)))
                 (seq foo (rep (alt bar #t)))
+                (seq (rep foo) (rep bar))
+                (rep (alt foo (rep bar)))
+                (seq foo (alt foo (rep bar)))
+                (rep (seq foo (rep bar)))
                 (alt foo (seq foo (rep bar)))
-                (rep (alt foo (rep (rep bar))))
-                (rep (alt foo (alt #t bar)))
-                (seq foo (rep (alt foo bar)))
-                (seq foo (rep (rep (alt #t bar))))
-                (rep (seq foo (rep (rep bar))))
-                (seq foo (alt #t (rep (rep bar))))
-                (alt #t (seq foo (rep (rep bar))))
-                (seq (rep foo) (rep (rep bar)))
-                (seq foo (rep (rep (rep (rep (rep bar))))))))
+                (seq foo (rep (alt #t (rep bar))))
+                (seq foo (seq bar (rep bar)))
+                ((seq foo (rep (alt bar _.0))) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
+                ((seq foo (rep (alt _.0 bar))) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
+                ((seq foo (rep (seq bar (rep _.0)))) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
+                (seq foo (rep (seq bar (rep bar))))
+                (seq (alt #t foo) (rep bar))
+                (seq foo (rep (seq bar (rep foo))))
+                (seq foo (alt (rep bar) #t))
+                (rep (alt (rep bar) foo))
+                (seq foo (seq (rep bar) bar))
+                ((seq foo (rep (seq (rep _.0) bar))) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
+                (rep (alt #t (alt foo bar)))
+                (seq foo (rep (seq (rep bar) bar)))
+                ((seq foo (alt _.0 (rep bar))) (=/= ((_.0 . bar)) ((_.0 . foo))) (sym _.0))
+                (seq foo (alt bar (rep bar)))
+                (alt #t (rep (alt foo bar)))
+                (rep (alt foo (alt #t bar)))))
 
 ;;; look for the literal match regex
 ;;; easy version
@@ -423,7 +426,6 @@
               '((seq foo (seq bar (seq bar bar)))))
 
 ;;; generate regex, and data that matches.
-;;; Interestingly, the data is almost always null.
 (check-expect "25"
               (run 30 (q)
                 (fresh (regex data)
@@ -432,35 +434,35 @@
                                 regex-BLANK)
                   (== `(,regex ,data) q)))
               '((#t ())
-                (((rep _.0) ()) (=/= ((_.0 . #f)) ((_.0 . #t))))
+                (((rep _.0) ()) (sym _.0))
+                ((rep (seq _.0 _.1)) ())
+                ((rep (alt _.0 _.1)) ())
                 (((alt #t _.0) ()) (sym _.0))
                 (((alt _.0 #t) ()) (sym _.0))
                 ((_.0 (_.0)) (sym _.0))
-                (((alt #t (rep _.0)) ()) (=/= ((_.0 . #f)) ((_.0 . #t))))
-                (((seq (rep _.0) (rep _.1)) ()) (=/= ((_.0 . #f)) ((_.0 . #t)) ((_.1 . #f)) ((_.1 . #t))))
-                (((alt _.0 (rep _.1)) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
+                (((alt #t (rep _.0)) ()) (sym _.0))
+                ((alt #t (rep (seq _.0 _.1))) ())
+                (((seq (rep _.0) (rep _.1)) ()) (sym _.0 _.1))
+                ((alt #t (rep (alt _.0 _.1))) ())
+                (((seq (rep _.0) (rep (seq _.1 _.2))) ()) (sym _.0))
+                (((seq (rep _.0) (rep (alt _.1 _.2))) ()) (sym _.0))
+                (((alt _.0 (rep _.1)) ()) (sym _.0 _.1))
+                (((seq (rep (seq _.0 _.1)) (rep _.2)) ()) (sym _.2))
                 (((alt #t (seq _.0 _.1)) ()) (sym _.0 _.1))
                 (((alt #t (alt #t _.0)) ()) (sym _.0))
-                (((seq (rep _.0) (alt #t _.1)) ()) (=/= ((_.0 . #f)) ((_.0 . #t))) (sym _.1))
-                (((alt (rep _.0) #t) ()) (=/= ((_.0 . #f)) ((_.0 . #t))))
-                (((seq (alt #t _.0) (rep _.1)) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
-                (((alt (rep _.0) _.1) ()) (=/= ((_.0 . #f)) ((_.0 . #t))) (sym _.1))
-                (((seq (rep _.0) (alt _.1 #t)) ()) (=/= ((_.0 . #f)) ((_.0 . #t))) (sym _.1))
+                (((alt _.0 (rep (seq _.1 _.2))) ()) (sym _.0))
+                (((seq (rep _.0) (alt #t _.1)) ()) (sym _.0 _.1))
+                ((seq (rep (seq _.0 _.1)) (rep (seq _.2 _.3))) ())
+                (((alt _.0 (rep (alt _.1 _.2))) ()) (sym _.0))
+                ((seq (rep (seq _.0 _.1)) (rep (alt _.2 _.3))) ())
+                (((seq (rep _.0) (alt _.1 #t)) ()) (sym _.0 _.1))
+                (((alt (rep _.0) #t) ()) (sym _.0))
                 (((alt #t (alt _.0 #t)) ()) (sym _.0))
-                (((alt #t (seq _.0 (rep _.1))) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
-                (((alt #t (alt #t (rep _.0))) ()) (=/= ((_.0 . #f)) ((_.0 . #t))))
-                (((seq (rep _.0) (alt #t (rep _.1))) ()) (=/= ((_.0 . #f)) ((_.0 . #t)) ((_.1 . #f)) ((_.1 . #t))))
+                (((alt (rep _.0) _.1) ()) (sym _.0 _.1))
+                (((seq (rep (alt _.0 _.1)) (rep _.2)) ()) (sym _.2))
                 (((alt _.0 (alt #t _.1)) ()) (sym _.0 _.1))
-                (((seq (rep _.0) (seq (rep _.1) (rep _.2))) ()) (=/= ((_.0 . #f)) ((_.0 . #t)) ((_.1 . #f)) ((_.1 . #t)) ((_.2 . #f)) ((_.2 . #t))))
-                (((alt (rep _.0) (rep _.1)) ()) (=/= ((_.0 . #f)) ((_.0 . #t)) ((_.1 . #f)) ((_.1 . #t)) ((_.1 . _.0))))
-                (((seq (alt _.0 #t) (rep _.1)) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
-                (((alt _.0 (alt _.1 #t)) ()) (sym _.0 _.1))
-                (((seq (alt #t _.0) (alt #t _.1)) ()) (sym _.0 _.1))
-                (((alt #t (alt _.0 _.1)) ()) (=/= ((_.0 . _.1))) (sym _.0 _.1))
-                (((seq (alt #t _.0) (alt _.1 #t)) ()) (sym _.0 _.1))
-                (((seq (rep _.0) (alt _.1 (rep _.2))) ()) (=/= ((_.0 . #f)) ((_.0 . #t)) ((_.2 . #f)) ((_.2 . #t))) (sym _.1))
-                (((alt #t (alt _.0 (rep _.1))) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
-                (((alt _.0 (alt #t (rep _.1))) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))))
+                (((seq (rep (seq _.0 _.1)) (alt #t _.2)) ()) (sym _.2))
+                ((seq (rep (alt _.0 _.1)) (rep (seq _.2 _.3))) ())))
 
 ;;; generate regex, and data that *doesn't* match.
 (check-expect "26"
@@ -477,29 +479,29 @@
                 (((alt _.0 _.1) ()) (=/= ((_.0 . _.1))) (sym _.0 _.1))
                 (((seq _.0 _.1) ()) (sym _.0 _.1))
                 ((#t (_.0 _.1)) (sym _.0 _.1))
-                (((seq _.0 (rep _.1)) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
-                (((seq (rep _.0) _.1) ()) (=/= ((_.0 . #f)) ((_.0 . #t))) (sym _.1))
+                (((seq _.0 (rep _.1)) ()) (sym _.0 _.1))
                 ((#t (_.0 _.1 _.2)) (sym _.0 _.1 _.2))
+                (((seq _.0 (rep (seq _.1 _.2))) ()) (sym _.0))
                 ((#f (_.0 _.1)) (sym _.0 _.1))
+                (((seq _.0 (rep (alt _.1 _.2))) ()) (sym _.0))
                 ((_.0 (_.1)) (=/= ((_.1 . _.0))) (sym _.0 _.1))
                 (((alt _.0 (alt _.1 _.2)) ()) (=/= ((_.1 . _.2))) (sym _.0 _.1 _.2))
                 (((alt (alt _.0 _.1) _.2) ()) (=/= ((_.0 . _.1))) (sym _.0 _.1 _.2))
                 (((alt _.0 (seq _.1 _.2)) ()) (sym _.0 _.1 _.2))
                 ((#t (_.0 _.1 _.2 _.3)) (sym _.0 _.1 _.2 _.3))
-                (((seq _.0 (seq _.1 _.2)) ()) (sym _.0 _.1 _.2))
+                (((seq (rep _.0) _.1) ()) (sym _.0 _.1))
                 (((alt (seq _.0 _.1) _.2) ()) (sym _.0 _.1 _.2))
-                (((seq _.0 (alt #t _.1)) ()) (sym _.0 _.1))
                 ((#t (_.0 _.1 _.2 _.3 _.4)) (sym _.0 _.1 _.2 _.3 _.4))
+                (((seq _.0 (seq _.1 _.2)) ()) (sym _.0 _.1 _.2))
+                (((seq _.0 (alt #t _.1)) ()) (sym _.0 _.1))
                 ((#f (_.0 _.1 _.2)) (sym _.0 _.1 _.2))
+                (((seq (rep (seq _.0 _.1)) _.2) ()) (sym _.2))
                 ((_.0 (_.0 _.1)) (sym _.0 _.1))
                 ((#t (_.0 _.1 _.2 _.3 _.4 _.5)) (sym _.0 _.1 _.2 _.3 _.4 _.5))
-                (((seq _.0 (alt _.1 #t)) ()) (sym _.0 _.1))
                 ((#t (_.0 _.1 _.2 _.3 _.4 _.5 _.6)) (sym _.0 _.1 _.2 _.3 _.4 _.5 _.6))
                 ((#f (_.0 _.1 _.2 _.3)) (sym _.0 _.1 _.2 _.3))
-                (((alt _.0 (seq _.1 (rep _.2))) ()) (=/= ((_.2 . #f)) ((_.2 . #t))) (sym _.0 _.1))
-                (((seq _.0 (seq _.1 (rep _.2))) ()) (=/= ((_.2 . #f)) ((_.2 . #t))) (sym _.0 _.1))
-                (((seq _.0 (alt #t (rep _.1))) ()) (=/= ((_.1 . #f)) ((_.1 . #t))) (sym _.0))
-                (((seq (rep _.0) (alt _.1 _.2)) ()) (=/= ((_.0 . #f)) ((_.0 . #t)) ((_.1 . _.2))) (sym _.1 _.2))))
+                (((seq _.0 (alt _.1 #t)) ()) (sym _.0 _.1))
+                ((#t (_.0 _.1 _.2 _.3 _.4 _.5 _.6 _.7)) (sym _.0 _.1 _.2 _.3 _.4 _.5 _.6 _.7))))
 
 ;;; generate regexs, and *non-empty* data, that match
 ;;; This seems slow to generate answers.  Even a run 3 takes a while.
