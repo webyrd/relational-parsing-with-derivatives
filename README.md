@@ -17,7 +17,7 @@ This repo curently contains five versions of the derivatives code:
 
 3. Will Byrd's relational version of the regular expression matcher, written in core miniKanren extended with disequality constraints (=/=) and the symbolo type predicate.
 
-4. Nada Amin's Clojure version of the regular expression matcher, written in core.logic.
+4. Nada Amin's Clojure version of the relational regular expression matcher, written in core.logic.
 
 5. Asumu Takikawa and Sam Tobin-Hochstadt's greatly cleaned up version of Will Byrd's Super Chobo port of the relational regular expression matcher to Racket.
 
