@@ -11,8 +11,8 @@
 ; In theory, tabling will allow this code to parse CFG's (or at least
 ; be something close to parsing CFG's).
 
-(require "mk.scm"
-         "racket-compat.scm"
+(require "mk.rkt"
+         "racket-compat.rkt"
          (prefix-in ru: rackunit))
 
 ; <regex> ::= #f                     ; Unmatchable pattern

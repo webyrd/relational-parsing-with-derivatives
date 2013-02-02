@@ -1,6 +1,6 @@
 #lang racket
 
-(require "racket-compat.scm")
+(require "racket-compat.rkt")
 
 ;; all defined for now, but should avoid exporting
 ;; private functions later
