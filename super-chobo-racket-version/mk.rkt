@@ -1,4 +1,11 @@
 #lang racket
+
+(require "racket-compat.rkt")
+
+;; all defined for now, but should avoid exporting
+;; private functions later
+(provide (all-defined-out))
+
 (define a->s (lambda (a) (car a)))
 (define a->c* (lambda (a) (cadr a)))
 (define a->t (lambda (a) (caddr a)))
@@ -225,9 +232,9 @@
 (define subsume-c*/t
   (lambda (x s c* t)
     (cond
-      ((exists (have-flat-tag? (lambda (u) (eq? u 'sym)) x) t)
+      ((findf (have-flat-tag? (lambda (u) (eq? u 'sym)) x) t)
        (subsumed-from-t-to-c* x s c* t '()))
-      ((exists (have-flat-tag? (lambda (u) (not (eq? u 'sym))) x) t)
+      ((findf (have-flat-tag? (lambda (u) (not (eq? u 'sym))) x) t)
        `(,c* . ,(drop-from-t x t)))
       (else `(,c* . ,t)))))
 
@@ -262,7 +269,7 @@
 (define new-c*
   (lambda (x tag c* s)
     (cond
-      ((exists
+      ((findf
          (lambda (c)
            (and (null? (cdr c))
              (eq? (walk (lhs (car c)) s) x)
@@ -276,7 +283,7 @@
 (define subsume
   (lambda (t c*)
     (remp (lambda (c)
-            (exists (subsumed-pr? t) c))
+            (findf (subsumed-pr? t) c))
       c*)))
  
 (define subsumed-pr?
