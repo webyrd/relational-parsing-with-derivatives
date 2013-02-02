@@ -15,6 +15,8 @@
          "racket-compat.rkt"
          (prefix-in ru: rackunit))
 
+(provide (all-defined-out))
+
 ; <regex> ::= #f                     ; Unmatchable pattern
 ;          |  #t                     ; Empty/blank pattern
 ;          |  '<symbol>              ; Symbol
