@@ -19,7 +19,7 @@ This repo curently contains five versions of the derivatives code:
 
 4. Nada Amin's Clojure version of the regular expression matcher, written in core.logic.
 
-5. Will Byrd's Super Chobo port of the relational regular expression matcher to Racket.  This version works, but neets some serious Racketization, especially as all the code is shoved into one giant file.  Please halp!
+5. Asumu Takikawa and Sam Tobin-Hochstadt's greatly cleaned up version of Will Byrd's Super Chobo port of the relational regular expression matcher to Racket.
 
 Currently, version 3 should be considered canonical.
 
@@ -39,7 +39,7 @@ Obvious TODO's:
 
 6. See if tabling will allow the code to handle CFGs, not just regular languages.  This may require implementing coinductive logic programming.  This may be accomplished more easily in core.logic, since miniKanren's tabling implementation doesn't yet support constraints.
 
-7. Clean up/Racketize the Super Chobo Racket implementation.
+7. Clean up/Racketize the Super Chobo Racket implementation. [UPDATE: Asumu Takikawa and Sam Tobin-Hochstadt kindly cleaned up the Racket code.]
 
 8. Implement Matt's derivatives based lexer as well.  Do both lexing and parsing relationally, as a pipeline.  What interesting things can you do when running backwards?
 

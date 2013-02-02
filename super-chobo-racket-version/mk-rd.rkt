@@ -1,7 +1,8 @@
 #lang racket
 
-; William E. Byrd's miniKanren version of Matt Might's code for derivative
-; parsing of regexp.
+; Asumu Takikawa and Sam Tobin-Hochstadt's greatly cleaned up version
+; of William E. Byrd's Super Chobo miniKanren version of Matt Might's
+; code for derivative parsing of regexp.
 
 ; Matt's original Scheme code can be found at
 ; http://matt.might.net/articles/implementation-of-regular-expression-matching-in-scheme-with-derivatives/
