@@ -1,5 +1,7 @@
 #lang racket
 
+(provide remp exists my-sort datum->string)
+
 (define (remp p ls)
   (cond
     ((null? ls) '())

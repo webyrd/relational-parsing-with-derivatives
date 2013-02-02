@@ -1,3 +1,5 @@
+#lang racket
+
 ; William E. Byrd's miniKanren version of Matt Might's code for derivative
 ; parsing of regexp.
 
@@ -9,7 +11,9 @@
 ; In theory, tabling will allow this code to parse CFG's (or at least
 ; be something close to parsing CFG's).
 
-(load "mk.scm")
+(require "mk.scm"
+         "racket-compat.scm"
+         (prefix-in ru: rackunit))
 
 ; <regex> ::= #f                     ; Unmatchable pattern
 ;          |  #t                     ; Empty/blank pattern
@@ -124,13 +128,13 @@
        (regex-matcho res d out)))))
 
 ;; Tests.
-(define (check-expect check expect)
-  (if (not (equal? check expect))
-      (begin (display "check-expect failed; got: ")
-             (display check)
-             (display "; expected: ")
-             (display expect)
-             (newline))))
+
+;; a `check-expect` macro that expands into a test submodule
+;;
+;; would be more idiomatic to just use `check-equal?` directly
+;; but defined this way for compatibility (for now)
+(define-syntax-rule (check-expect check expect)
+  (module+ test (ru:check-equal? check expect)))
 
 ;;; new tests
 

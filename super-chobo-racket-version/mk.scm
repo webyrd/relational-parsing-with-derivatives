@@ -1,4 +1,11 @@
 #lang racket
+
+(require "racket-compat.scm")
+
+;; all defined for now, but should avoid exporting
+;; private functions later
+(provide (all-defined-out))
+
 (define a->s (lambda (a) (car a)))
 (define a->c* (lambda (a) (cadr a)))
 (define a->t (lambda (a) (caddr a)))
