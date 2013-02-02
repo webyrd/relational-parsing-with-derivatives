@@ -41,6 +41,8 @@ Obvious TODO's:
 
 7. Clean up/Racketize the Super Chobo Racket implementation.
 
+8. Implement Matt's derivatives based lexer as well.  Do both lexing and parsing relationally, as a pipeline.  What interesting things can you do when running backwards?
+
 See the comments in the Scheme and miniKanren code for other TODO's and open questions.
 
 All Scheme/miniKanren code was tested with Petite Chez Scheme 8.4.
