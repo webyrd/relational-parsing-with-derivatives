@@ -8,6 +8,12 @@
 ; parsing of regexp.
 
 ;;; ! BUG shown in maino-3b: matching isn't necessarily greedy
+;;; In other words, Kleene star and Kleene plus don't have 'maximum munch' semantics:
+;;; http://en.wikipedia.org/wiki/Maximal_munch
+;;; Indeed, this is a problem pointed out by Oleg when not using committed choice.
+;;; What is the right way to solve this problem?  I smell constraints for the character
+;;; classes--maybe constraints would help with maximum munch as well.  Oleg seems skeptical
+;;; that constraints will help.  This is an interesting problem!
 
 (load "mk-rd.scm")
 
