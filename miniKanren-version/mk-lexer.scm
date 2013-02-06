@@ -7,6 +7,8 @@
 ; This file requires the miniKanren version of Matt Might's code for derivative
 ; parsing of regexp.
 
+;;; ! BUG shown in maino-3b: matching isn't necessarily greedy
+
 (load "mk-rd.scm")
 
 ;;; Regular language convenience operators
@@ -492,6 +494,13 @@
                  (SymbolToken (a))
                  (SymbolToken (b))
                  (PuncToken right-paren))))
+
+;;; Bug!  The matching isn't always greedy.
+(check-expect "maino-3b"
+              (run 2 (q)
+                (maino '(a a) q))
+              '(((SymbolToken (a)) (SymbolToken (a)))
+                ((SymbolToken (a a)))))
 
 ;; this takes too long to run
 ;(check-expect "maino-4"
