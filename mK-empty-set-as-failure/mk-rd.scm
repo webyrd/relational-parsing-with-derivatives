@@ -706,6 +706,42 @@
               (run* (q) (repo EPSILON q))
               '(#t))
 
+
+;;; generate strings that match a certain regex
+(check-expect "40"
+              (run 30 (q) (regex-matcho '(seq foo (rep (alt bar baz))) 
+                                      q))
+              '((foo)
+                (foo bar)
+                (foo baz)
+                (foo bar bar)
+                (foo baz bar)
+                (foo bar baz)
+                (foo baz baz)
+                (foo bar bar bar)
+                (foo baz bar bar)
+                (foo bar baz bar)
+                (foo baz baz bar)
+                (foo bar bar baz)
+                (foo baz bar baz)
+                (foo bar baz baz)
+                (foo baz baz baz)
+                (foo bar bar bar bar)
+                (foo baz bar bar bar)
+                (foo bar baz bar bar)                
+                (foo baz baz bar bar)
+                (foo bar bar baz bar)
+                (foo baz bar baz bar)
+                (foo bar baz baz bar)
+                (foo baz baz baz bar)
+                (foo bar bar bar baz)
+                (foo baz bar bar baz)
+                (foo bar baz bar baz)
+                (foo baz baz bar baz)
+                (foo bar bar baz baz)
+                (foo baz bar baz baz)
+                (foo bar baz baz baz)))
+
 ;;; original tests
 
 (check-expect "31"
