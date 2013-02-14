@@ -742,6 +742,13 @@
                 (foo baz bar baz baz)
                 (foo bar baz baz baz)))
 
+(check-expect "41"
+              (run* (q)
+                (fresh (re2)
+                  (regex-matcho `(seq foo ,re2) 
+                                '(bar))))
+              '())
+
 ;;; original tests
 
 (check-expect "31"
@@ -770,4 +777,3 @@
               (run* (q) (regex-matcho '(seq foo (rep (alt bar baz))) 
                                       '(foo bar baz bar bar)))
               '(_.0))
-
