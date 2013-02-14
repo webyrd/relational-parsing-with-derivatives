@@ -9,7 +9,7 @@ and
 
 http://matt.might.net/articles/parsing-with-derivatives/
 
-This repo curently contains five versions of the derivatives code:
+This repo curently contains six versions of the derivatives code:
 
 1. Matt Might's original Scheme code for regular expression matching, from the first blog post above.  This code is actually for an acceptor, rather than a parser.
 
@@ -20,6 +20,8 @@ This repo curently contains five versions of the derivatives code:
 4. Nada Amin's Clojure version of the relational regular expression matcher, written in core.logic.
 
 5. Asumu Takikawa and Sam Tobin-Hochstadt's greatly cleaned up version of Will Byrd's Super Chobo port of the relational regular expression matcher to Racket.
+
+6. Will Byrd's relational version of the regular expression matcher, written in miniKanren, and representing the empty set as failure.  Given the increased performance and cleaner code, this version will probably become canonical.  This version is also a prime candidate for character class constraints for the regex parser.
 
 Currently, version 3 should be considered canonical.
 
