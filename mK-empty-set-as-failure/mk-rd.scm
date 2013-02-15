@@ -44,6 +44,27 @@
 ;;; terms are never instantiated incorrectly.  Would need rep, alt,
 ;;; and seq constraints.
 
+;;; *** open questions:
+;;;
+;;; * can not-deltao and no-d/dco be used to generate *non-matching*
+;;; regex/string pairs, as can be done when treating the empty-set as
+;;; a valid regex?
+;;;
+;;; * how can the constraints on regex terms be made as simple and
+;;; minimal as possible?  Is there a good theory of how this should be
+;;; done?  Compared with the Oleg number system, the constraints on
+;;; these terms are very heavy-weight.  Still, the constraints aren't
+;;; sufficient to keep all terms with fresh variables from being
+;;; instantiated with illegal values.  Seems like we should either
+;;; have the minimal constraints possible (to keep the system from
+;;; generating illegal terms when running backwards), or we should
+;;; implement real baked-in term constraints that ensure safety.  The
+;;; middle approach doesn't seem very satisfying.
+;;;
+;;; * The constraints on terms, and the constraints on character
+;;; classes for the lexer, feel very much like types.  Maybe it is
+;;; time for a typed miniKanren.
+
 (load "mk.scm")
 
 ; <regex> ::= 
